@@ -39,7 +39,7 @@ if st.button("Predict"):
     label = "Benign" if prediction == 2 else "Malignant"
 
     # st.write(f"The prediction is {label} (Class: {prediction})")
-    st.success(f"The prediction is {label} (Class: {prediction})", icon=":material/thumb_up:")
+    st.success(f"The prediction is a {label} tumor (Class: {prediction})", icon=":material/thumb_up:")
     rain(emoji="🎈", font_size=54, falling_speed=5, animation_length="infinite",)
 
     # Use the codes below when connecting via fastapi endpoints (line 44 to 64)
