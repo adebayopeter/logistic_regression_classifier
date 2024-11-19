@@ -1,5 +1,12 @@
 import streamlit as st
 import requests
+import numpy as np
+import joblib
+from streamlit_extras.let_it_rain import rain
+
+# Load model
+model = joblib.load("model/model.pkl")
+scaler = joblib.load("model/scaler.pkl")
 
 # Streamlit app title and description
 st.title("Breast Cancer Prediction")
@@ -18,28 +25,46 @@ mitoses = st.number_input("Mitoses", min_value=1, max_value=10, value=1)
 
 # Prediction button
 if st.button("Predict"):
+    # Comment out line 28 to 40, if you want to use fastapi
+    input_data = np.array([[
+        clump_thickness, uniformity_of_cell_size, uniformity_of_cell_shape,
+        marginal_adhesion, single_epithelial_cell_size, bare_nuclei,
+        bland_chromatin, normal_nucleoli, mitoses
+    ]])
+    # Scale the input data
+    scaled_data = scaler.transform(input_data)
+
+    # Make the prediction
+    prediction = model.predict(scaled_data)[0]
+    label = "Benign" if prediction == 2 else "Malignant"
+
+    # st.write(f"The prediction is {label} (Class: {prediction})")
+    st.success(f"The prediction is {label} (Class: {prediction})", icon=":material/thumb_up:")
+    rain(emoji="🎈", font_size=54, falling_speed=5, animation_length="infinite",)
+
+    # Use the codes below when connecting via fastapi endpoints (line 44 to 64)
     # Prepare the data for API request
-    input_data = {
-        "clump_thickness": clump_thickness,
-        "uniformity_of_cell_size": uniformity_of_cell_size,
-        "uniformity_of_cell_shape": uniformity_of_cell_shape,
-        "marginal_adhesion": marginal_adhesion,
-        "single_epithelial_cell_size": single_epithelial_cell_size,
-        "bare_nuclei": bare_nuclei,
-        "bland_chromatin": bland_chromatin,
-        "normal_nucleoli": normal_nucleoli,
-        "mitoses": mitoses,
-    }
+    # input_data = {
+    #     "clump_thickness": clump_thickness,
+    #     "uniformity_of_cell_size": uniformity_of_cell_size,
+    #     "uniformity_of_cell_shape": uniformity_of_cell_shape,
+    #     "marginal_adhesion": marginal_adhesion,
+    #     "single_epithelial_cell_size": single_epithelial_cell_size,
+    #     "bare_nuclei": bare_nuclei,
+    #     "bland_chromatin": bland_chromatin,
+    #     "normal_nucleoli": normal_nucleoli,
+    #     "mitoses": mitoses,
+    # }
 
     # Make the API request
-    response = requests.post("http://127.0.0.1:8001/predict", json=input_data)
+    # response = requests.post("http://127.0.0.1:8001/predict", json=input_data)
 
-    if response.status_code == 200:
-        prediction = response.json()
-        st.write(f"The prediction is {prediction['label']} (Class: {prediction['prediction']})")
-    else:
-        print(response)
-        st.write("Error: Could not retrieve prediction. Please try again.")
+    # if response.status_code == 200:
+    #     prediction = response.json()
+    #     st.write(f"The prediction is {prediction['label']} (Class: {prediction['prediction']})")
+    # else:
+    #     print(response)
+    #     st.write("Error: Could not retrieve prediction. Please try again.")
 
 # Run the Streamlit App
 # streamlit run app.py
